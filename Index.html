@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Me perdonas?</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background-color: #fdf2f8;
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+        }
+
+        .btn-option:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-selected {
+            border-color: #ec4899 !important;
+            background-color: #fce7f3 !important;
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25);
+        }
+
+        .cat-img {
+            max-height: 140px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            margin: 0 auto;
+            display: block;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Movimiento escurridizo constante sin transparencia */
+        .btn-escurridizo {
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            will-change: transform;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div id="card" class="bg-white/95 backdrop-blur-md p-5 sm:p-7 rounded-3xl shadow-2xl border-4 border-pink-200 w-full max-w-md text-center relative max-h-[92vh] overflow-y-auto my-auto flex flex-col justify-between">
+        
+        <!-- PANTALLA 1: INICIO (ME PERDONAS) -->
+        <div id="step-1" class="fade-in my-auto py-2">
+            <div class="mb-4 flex items-center justify-center">
+                <img src="gato-llorando.png" alt="Gatito Llorando" class="cat-img rounded-2xl">
+            </div>
+            <h1 class="text-3xl font-extrabold text-pink-600 mb-1">¿Me perdonas?</h1>
+            <p class="text-gray-500 mb-6 font-medium text-sm">Michi arrepentido 🥺</p>
+            
+            <div class="flex justify-center items-center gap-4 relative min-h-[60px] px-2" id="btn-container-1">
+                <button onclick="nextStep(2)" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-3 px-7 rounded-2xl shadow-lg transform active:scale-95 transition-all text-base z-10">
+                    Sí, te perdono ❤️
+                </button>
+                
+                <button id="btn-no" type="button" class="btn-escurridizo bg-white border-2 border-gray-200 text-gray-700 font-bold py-3 px-5 rounded-2xl shadow cursor-pointer select-none">
+                    No :(
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 2: AGRADECIMIENTO CON BARRA -->
+        <div id="step-2" class="hidden fade-in my-auto py-2">
+            <div class="mb-4 flex items-center justify-center">
+                <img src="gato-cool.png" alt="Gatito Cool" class="cat-img rounded-2xl">
+            </div>
+            <h2 class="text-2xl font-bold text-pink-600 mb-1">¿De verdad? 🥺</h2>
+            <p class="text-gray-600 font-medium text-sm mb-5">¡Gracias por perdonarme!</p>
+
+            <div class="w-full bg-gray-100 rounded-full h-3.5 mb-2 overflow-hidden border border-pink-100 p-0.5">
+                <div id="progress-bar" class="bg-gradient-to-r from-pink-400 to-rose-500 h-full rounded-full transition-all duration-300 w-0"></div>
+            </div>
+            <p id="progress-text" class="text-xs font-bold text-pink-500 tracking-wider mb-5">SINTIÉNDOME MEJOR... 0%</p>
+
+            <button id="btn-step2-next" onclick="nextStep(3)" disabled class="w-full bg-pink-300 text-white font-bold py-3 rounded-2xl shadow opacity-50 cursor-not-allowed transition-all text-base">
+                Sigue ➔
+            </button>
+        </div>
+
+        <!-- PANTALLA 3: ARMADO DE LA CITA -->
+        <div id="step-3" class="hidden fade-in text-left my-auto py-1">
+            <div class="mb-3 flex items-center justify-center">
+                <img src="gato-traje.png" alt="Gatito Elegante" class="cat-img rounded-xl">
+            </div>
+            <h2 class="text-xl font-bold text-center text-pink-600 mb-4">Armemos nuestra cita ✨</h2>
+
+            <!-- 1. FLORES -->
+            <div class="mb-3">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">1. Elige tus flores 💐</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="selectOption('flower', 'Rosas 🌹', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">Rosas 🌹</button>
+                    <button onclick="selectOption('flower', 'Girasoles 🌻', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">Girasoles 🌻</button>
+                    <button onclick="selectOption('flower', 'Orquídeas 🌸', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">Orquídeas 🌸</button>
+                </div>
+            </div>
+
+            <!-- 2. COMIDA -->
+            <div id="cat-food" class="mb-3 hidden fade-in">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">2. ¿Qué comemos? 🍔</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="selectOption('food', 'Tacos 🌮', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">Tacos 🌮</button>
+                    <button onclick="selectOption('food', 'Pizza 🍕', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">Pizza 🍕</button>
+                    <button onclick="selectOption('food', 'Comida China 🥡', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">China 🥡</button>
+                </div>
+            </div>
+
+            <!-- 3. BEBIDA -->
+            <div id="cat-drink" class="mb-3 hidden fade-in">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">3. ¿Qué tomamos? 🥤</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="selectOption('drink', 'Vino 🍷', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">Vino 🍷</button>
+                    <button onclick="selectOption('drink', 'Gaseosa 🥤', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">Gaseosa 🥤</button>
+                    <button onclick="selectOption('drink', 'Cerveza 🍺', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700">Cerveza 🍺</button>
+                </div>
+            </div>
+
+            <!-- 4. LUGAR -->
+            <div id="cat-place" class="mb-3 hidden fade-in">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">4. ¿Dónde nos vemos? 🏠</label>
+                <div class="grid grid-cols-2 gap-2 relative p-1 bg-gray-50 rounded-xl border border-gray-100 min-h-[52px] items-center overflow-visible" id="place-container">
+                    <button id="btn-tu-casa" type="button" class="btn-escurridizo border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700 select-none cursor-pointer">
+                        Tu casa 🚫
+                    </button>
+                    <button onclick="selectOption('place', 'La mía 🏠✨', this)" class="btn-option border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700 z-10">
+                        La mía 🏠✨
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5. FECHA -->
+            <div id="cat-date" class="mb-5 hidden fade-in">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">5. Elige la fecha 📅</label>
+                <input type="date" id="date-input" onchange="checkFinish()" class="w-full border-2 border-gray-200 rounded-xl p-2 text-xs font-bold text-gray-700 outline-none focus:border-pink-500">
+            </div>
+
+            <button id="btn-finish" onclick="finishItinerary()" disabled class="w-full bg-pink-300 text-white font-bold py-3 rounded-2xl shadow opacity-50 cursor-not-allowed transition-all text-center text-sm">
+                ¡Confirmar Cita! 🎉
+            </button>
+        </div>
+
+        <!-- PANTALLA 4: RESULTADO FINAL -->
+        <div id="step-4" class="hidden fade-in my-auto py-2">
+            <div class="mb-4 flex items-center justify-center">
+                <img src="gato-gritando.png" alt="Gatito Gritando" class="cat-img rounded-2xl">
+            </div>
+            
+            <h2 class="text-2xl font-black text-pink-600 mb-1 leading-tight">¡CITA CONFIRMADA! 🎉</h2>
+            <p class="text-xs font-semibold text-gray-400 mb-4">¡Gatito gritando de la emoción!</p>
+
+            <div class="bg-pink-50/80 rounded-2xl p-4 border border-pink-200 text-left mb-5 space-y-2 text-xs font-medium text-gray-700 shadow-inner">
+                <div class="flex justify-between border-b border-pink-100 pb-1.5">
+                    <span class="text-gray-500">💐 Flores:</span>
+                    <span id="res-flower" class="font-bold text-pink-600"></span>
+                </div>
+                <div class="flex justify-between border-b border-pink-100 pb-1.5">
+                    <span class="text-gray-500">🌮 Comida:</span>
+                    <span id="res-food" class="font-bold text-pink-600"></span>
+                </div>
+                <div class="flex justify-between border-b border-pink-100 pb-1.5">
+                    <span class="text-gray-500">🥤 Bebida:</span>
+                    <span id="res-drink" class="font-bold text-pink-600"></span>
+                </div>
+                <div class="flex justify-between border-b border-pink-100 pb-1.5">
+                    <span class="text-gray-500">🏠 Lugar:</span>
+                    <span id="res-place" class="font-bold text-pink-600"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">📅 Fecha:</span>
+                    <span id="res-date" class="font-bold text-pink-600"></span>
+                </div>
+            </div>
+
+            <p class="text-pink-500 font-bold text-xs mt-2">¡Nos vemos pronto! ❤️</p>
+        </div>
+
+    </div>
+
+    <script>
+        let choices = {
+            flower: null,
+            food: null,
+            drink: null,
+            place: null,
+            date: null
+        };
+
+        // FUNCIÓN QUE HACE QUE EL BOTÓN SE ESCURRA AL PASAR EL MOUSE
+        function makeEvasiveLocal(element, maxOffset = 70) {
+            let lastX = 0;
+            let lastY = 0;
+
+            const escape = (e) => {
+                if (e) e.preventDefault();
+
+                let newX = (Math.random() - 0.5) * (maxOffset * 2);
+                let newY = (Math.random() - 0.5) * (maxOffset * 2);
+
+                if (Math.abs(newX - lastX) < 20) newX += 30;
+                if (Math.abs(newY - lastY) < 20) newY += 30;
+
+                lastX = newX;
+                lastY = newY;
+
+                element.style.transform = `translate(${newX}px, ${newY}px)`;
+            };
+
+            ['mouseenter', 'mousemove', 'mouseover', 'touchstart', 'click'].forEach(evt => {
+                element.addEventListener(evt, escape);
+            });
+        }
+
+        // Activamos la evasión local en el botón No
+        const btnNo = document.getElementById('btn-no');
+        makeEvasiveLocal(btnNo, 80);
+
+        // NAVEGACIÓN ENTRE PASOS
+        function nextStep(step) {
+            document.querySelectorAll('#card > div').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`step-${step}`);
+            target.classList.remove('hidden');
+
+            if (step === 2) {
+                let progress = 0;
+                const pBar = document.getElementById('progress-bar');
+                const pText = document.getElementById('progress-text');
+                const btnNext = document.getElementById('btn-step2-next');
+
+                const interval = setInterval(() => {
+                    progress += 4;
+                    if (progress > 100) progress = 100;
+                    pBar.style.width = `${progress}%`;
+                    pText.innerText = `SINTIÉNDOME MEJOR... ${progress}%`;
+
+                    if (progress === 100) {
+                        clearInterval(interval);
+                        pText.innerText = "¡SINTIÉNDOME MEJOR... 100% ✨!";
+                        btnNext.disabled = false;
+                        btnNext.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-pink-300');
+                        btnNext.classList.add('bg-gradient-to-r', 'from-pink-500', 'to-rose-500', 'hover:from-pink-600', 'hover:to-rose-600');
+                    }
+                }, 70);
+            }
+        }
+
+        // SELECCIÓN DE OPCIONES (PANTALLA 3)
+        function selectOption(category, val, btn) {
+            choices[category] = val;
+
+            const parent = btn.parentElement;
+            parent.querySelectorAll('button').forEach(b => b.classList.remove('btn-selected'));
+            btn.classList.add('btn-selected');
+
+            if (category === 'flower') {
+                document.getElementById('cat-food').classList.remove('hidden');
+            } else if (category === 'food') {
+                document.getElementById('cat-drink').classList.remove('hidden');
+            } else if (category === 'drink') {
+                document.getElementById('cat-place').classList.remove('hidden');
+                makeEvasiveLocal(document.getElementById('btn-tu-casa'), 35);
+            } else if (category === 'place') {
+                document.getElementById('cat-date').classList.remove('hidden');
+            }
+
+            checkFinish();
+        }
+
+        // VALIDACIÓN DE FECHA Y REQUISITOS
+        function checkFinish() {
+            const dateVal = document.getElementById('date-input').value;
+            choices.date = dateVal;
+
+            const btnFinish = document.getElementById('btn-finish');
+            if (choices.flower && choices.food && choices.drink && choices.place && choices.date) {
+                btnFinish.disabled = false;
+                btnFinish.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-pink-300');
+                btnFinish.classList.add('bg-gradient-to-r', 'from-pink-500', 'to-rose-500', 'hover:from-pink-600', 'hover:to-rose-600');
+            }
+        }
+
+        // RESULTADO Y CONFETI
+        function finishItinerary() {
+            document.getElementById('res-flower').innerText = choices.flower;
+            document.getElementById('res-food').innerText = choices.food;
+            document.getElementById('res-drink').innerText = choices.drink;
+            document.getElementById('res-place').innerText = choices.place;
+            document.getElementById('res-date').innerText = choices.date;
+
+            nextStep(4);
+
+            confetti({
+                particleCount: 120,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+    </script>
+</body>
+</html>
