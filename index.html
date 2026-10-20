@@ -48,9 +48,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Movimiento escurridizo constante sin transparencia */
         .btn-escurridizo {
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            transition: transform 0.12s ease-out !important;
             will-change: transform;
         }
     </style>
@@ -134,10 +133,10 @@
                 </div>
             </div>
 
-            <!-- 4. LUGAR -->
+            <!-- 4. LUGAR (CON CONTENEDOR RESTRINGIDO) -->
             <div id="cat-place" class="mb-3 hidden fade-in">
                 <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">4. ¿Dónde nos vemos? 🏠</label>
-                <div class="grid grid-cols-2 gap-2 relative p-1 bg-gray-50 rounded-xl border border-gray-100 min-h-[52px] items-center overflow-visible" id="place-container">
+                <div class="grid grid-cols-2 gap-2 relative p-1 bg-gray-50 rounded-xl border border-gray-100 min-h-[52px] items-center overflow-hidden" id="place-container">
                     <button id="btn-tu-casa" type="button" class="btn-escurridizo border-2 border-gray-200 rounded-xl p-2 text-center bg-white text-xs font-bold text-gray-700 select-none cursor-pointer">
                         Tu casa 🚫
                     </button>
@@ -150,10 +149,10 @@
             <!-- 5. FECHA -->
             <div id="cat-date" class="mb-5 hidden fade-in">
                 <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">5. Elige la fecha 📅</label>
-                <input type="date" id="date-input" onchange="checkFinish()" class="w-full border-2 border-gray-200 rounded-xl p-2 text-xs font-bold text-gray-700 outline-none focus:border-pink-500">
+                <input type="date" id="date-input" onchange="checkFinish()" class="w-full border-2 border-gray-200 rounded-xl p-2 text-xs font-bold text-gray-700 outline-none focus:border-pink-500 bg-white relative z-20">
             </div>
 
-            <button id="btn-finish" onclick="finishItinerary()" disabled class="w-full bg-pink-300 text-white font-bold py-3 rounded-2xl shadow opacity-50 cursor-not-allowed transition-all text-center text-sm">
+            <button id="btn-finish" onclick="finishItinerary()" disabled class="w-full bg-pink-300 text-white font-bold py-3 rounded-2xl shadow opacity-50 cursor-not-allowed transition-all text-center text-sm relative z-20">
                 ¡Confirmar Cita! 🎉
             </button>
         </div>
@@ -204,19 +203,19 @@
             date: null
         };
 
-        // FUNCIÓN QUE HACE QUE EL BOTÓN SE ESCURRA AL PASAR EL MOUSE
-        function makeEvasiveLocal(element, maxOffset = 70) {
+        // MOVIMIENTO ESTRICTAMENTE LIMITADO A SU PROPIA CAJA PARA EVITAR SOLAPAMIENTOS
+        function makeEvasiveStrict(element, maxRange = 35) {
             let lastX = 0;
             let lastY = 0;
 
             const escape = (e) => {
                 if (e) e.preventDefault();
 
-                let newX = (Math.random() - 0.5) * (maxOffset * 2);
-                let newY = (Math.random() - 0.5) * (maxOffset * 2);
+                let newX = (Math.random() - 0.5) * (maxRange * 2);
+                let newY = (Math.random() - 0.5) * (maxRange);
 
-                if (Math.abs(newX - lastX) < 20) newX += 30;
-                if (Math.abs(newY - lastY) < 20) newY += 30;
+                if (Math.abs(newX - lastX) < 10) newX += 15;
+                if (Math.abs(newY - lastY) < 10) newY += 10;
 
                 lastX = newX;
                 lastY = newY;
@@ -229,9 +228,9 @@
             });
         }
 
-        // Activamos la evasión local en el botón No
+        // Activamos evasión acotada para el botón No
         const btnNo = document.getElementById('btn-no');
-        makeEvasiveLocal(btnNo, 80);
+        makeEvasiveStrict(btnNo, 70);
 
         // NAVEGACIÓN ENTRE PASOS
         function nextStep(step) {
@@ -276,7 +275,7 @@
                 document.getElementById('cat-drink').classList.remove('hidden');
             } else if (category === 'drink') {
                 document.getElementById('cat-place').classList.remove('hidden');
-                makeEvasiveLocal(document.getElementById('btn-tu-casa'), 35);
+                makeEvasiveStrict(document.getElementById('btn-tu-casa'), 25);
             } else if (category === 'place') {
                 document.getElementById('cat-date').classList.remove('hidden');
             }
